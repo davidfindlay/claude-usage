@@ -36,18 +36,48 @@ struct OAuthToken {
     subscription_type: Option<String>,
 }
 
-fn get_token_from_keychain() -> Result<OAuthToken> {
+/// 1. CLAUDE_CODE_OAUTH_TOKEN env var (any platform)
+/// 2. ~/.claude/.credentials.json (Linux / any platform without Keychain)
+/// 3. macOS Keychain (macOS default)
+fn get_token() -> Result<OAuthToken> {
+    // ── 1. Environment variable override ──────────────────────────────────────
+    if let Ok(token) = std::env::var("CLAUDE_CODE_OAUTH_TOKEN") {
+        let token = token.trim().to_string();
+        if !token.is_empty() {
+            return Ok(OAuthToken {
+                access_token: token,
+                subscription_type: None,
+            });
+        }
+    }
+
+    // ── 2. ~/.claude/.credentials.json (Linux / cross-platform fallback) ──────
+    if let Some(home) = std::env::var_os("HOME") {
+        let creds_path = std::path::Path::new(&home)
+            .join(".claude")
+            .join(".credentials.json");
+        if creds_path.exists() {
+            let raw = std::fs::read_to_string(&creds_path)
+                .context("Found ~/.claude/.credentials.json but could not read it")?;
+            let creds: OAuthCredentials = serde_json::from_str(raw.trim())
+                .context("Could not parse ~/.claude/.credentials.json")?;
+            return Ok(creds.claude_ai_oauth);
+        }
+    }
+
+    // ── 3. macOS Keychain ─────────────────────────────────────────────────────
     let output = Command::new("security")
         .args(["find-generic-password", "-s", "Claude Code-credentials", "-w"])
         .output()
-        .context("Failed to run 'security' command — are you on macOS?")?;
+        .context("Could not find credentials — tried env var, ~/.claude/.credentials.json, and macOS Keychain")?;
 
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
         bail!(
-            "Could not read Claude Code credentials from Keychain.\n\
+            "Could not read Claude Code credentials.\n\
+             Tried: CLAUDE_CODE_OAUTH_TOKEN env var, ~/.claude/.credentials.json, macOS Keychain.\n\
              Make sure Claude Code is installed and you've logged in.\n\
-             Error: {stderr}"
+             Keychain error: {stderr}"
         );
     }
 
@@ -192,7 +222,7 @@ fn run() -> Result<()> {
         print!("  {} Fetching usage data... ", "◆".cyan());
     }
 
-    let token = get_token_from_keychain()?;
+    let token = get_token()?;
     let usage = fetch_usage(&token.access_token)?;
 
     if plain {
