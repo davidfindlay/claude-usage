@@ -37,6 +37,10 @@ Or run without installing:
 cargo run
 ```
 
+## License
+
+GPL-3.0 (see `LICENSE`).
+
 ## Tips
 
 - Run it before a heavy Claude Code session to check your headroom
