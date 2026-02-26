@@ -45,6 +45,11 @@ claude-usage --plain  # plain text for scripts/automation
 claude-usage -p       # same as --plain
 ```
 
+## OpenClaw skill wrapper
+
+If you use OpenClaw, the companion skill wrapper is here:
+- https://github.com/davidfindlay/openclaw-claude-usage-skill
+
 ## License
 
 GPL-3.0 (see `LICENSE`).
