@@ -37,6 +37,14 @@ Or run without installing:
 cargo run
 ```
 
+## CLI usage
+
+```bash
+claude-usage          # coloured output
+claude-usage --plain  # plain text for scripts/automation
+claude-usage -p       # same as --plain
+```
+
 ## License
 
 GPL-3.0 (see `LICENSE`).
