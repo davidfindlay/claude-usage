@@ -143,7 +143,6 @@ fn format_reset(resets_at: &Option<String>) -> String {
         return ts.clone();
     };
     let local: DateTime<Local> = dt.into();
-    let now = Local::now();
     let diff = dt.signed_duration_since(Utc::now());
 
     let mins = diff.num_minutes();

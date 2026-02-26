@@ -43,3 +43,18 @@ cargo run
 - The 5-hour window resets 5 hours after your *first* message, not on a fixed clock
 - Usage is shared across claude.ai, Claude Code, and the Claude desktop app
 - If the token is expired, just run `claude` in your terminal to refresh it
+
+## Troubleshooting
+
+- **Could not read credentials**
+  - Ensure Claude Code is logged in (`claude`), or set `CLAUDE_CODE_OAUTH_TOKEN`.
+- **401 from API**
+  - Re-authenticate: `claude logout && claude`
+- **No Keychain (Linux)**
+  - Ensure `~/.claude/.credentials.json` exists, or provide env token.
+
+## Privacy & security
+
+- This tool reads local OAuth credentials to query usage.
+- It does **not** print raw tokens.
+- Avoid sharing output publicly if your usage details are sensitive.
